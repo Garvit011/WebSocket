@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>WebSocket Client</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    #messages {
+      border: 1px solid #ccc;
+      padding: 10px;
+      height: 300px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    .msg {
+      margin: 5px 0;
+    }
+    .client { color: blue; }
+    .server { color: green; }
+  </style>
+</head>
+<body>
+  <h2>WebSocket Chat</h2>
+  <div id="messages"></div>
+  <input type="text" id="messageInput" placeholder="Type a message" />
+  <button onclick="sendMessage()">Send</button>
+
+  <script>
+    const ws = new WebSocket("ws://localhost:8080");
+
+    const messagesDiv = document.getElementById("messages");
+
+    function logMessage(msg, type) {
+      const div = document.createElement("div");
+      div.className = `msg ${type}`;
+      div.textContent = msg;
+      messagesDiv.appendChild(div);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    ws.onopen = () => logMessage("✅ Connected to server", "server");
+    ws.onmessage = (event) => logMessage("📩 Server: " + event.data, "server");
+    ws.onerror = () => logMessage("❌ Error occurred", "server");
+    ws.onclose = () => logMessage("🔌 Connection closed", "server");
+
+    function sendMessage() {
+      const input = document.getElementById("messageInput");
+      const msg = input.value.trim();
+      if (msg) {
+        ws.send(msg);
+        logMessage("🧑 You: " + msg, "client");
+        input.value = "";
+      }
+    }
+
+    document.getElementById("messageInput").addEventListener("keyup", (e) => {
+  if (e.key === "Enter") sendMessage();
+});
+  </script>
+</body>
+</html>
